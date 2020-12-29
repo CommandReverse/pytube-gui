@@ -1,44 +1,51 @@
 import os
 import tkinter as tk
-import tkinter.font as tkfont
 from tkinter.filedialog import askdirectory
+from tkinter import messagebox
 from pytube import YouTube
 
 basedir = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_video_url():
-    item = url_entry.get()
-    path = askdirectory(initialdir="/", title="Select Directory")
-    YouTube(item).streams.first().download(output_path=path)
+class YtGui:
+    HEIGHT = 800
+    WIDTH = 800
+
+    def __init__(self, master):
+        ICON = tk.PhotoImage(file=os.path.join(basedir, "icon.png"))
+        self.master = master
+        master.title("YouTube Video Downloader")
+        master.iconphoto(False, ICON)
+        master.geometry("800x800")
+
+        self.label_1 = tk.Label(self.master, text="Enter the URL")
+        self.label_1.pack()
+        self.url_entry = tk.Entry(self.master)
+        self.url_entry.pack()
+        self.label_2 = tk.Label(self.master, text="Enter file name")
+        self.label_2.pack()
+        self.file_name = tk.Entry(self.master)
+        self.file_name.pack()
+        self.download = tk.Button(text="Download",
+                                  padx=5,
+                                  pady=5,
+                                  fg="white",
+                                  bg="DeepSkyBlue",
+                                  command=self.get_video_url)
+        self.download.pack()
+
+    def get_video_url(self):
+        item = self.url_entry.get()
+        fn = self.file_name.get()
+        path = askdirectory(initialdir="/", title="Select Directory")
+        if fn is not None or not fn == "":
+            YouTube(item).streams.first().download(output_path=path,
+                                                   filename=fn)
+        else:
+            YouTube(item).streams.first().download(output_path=path)
+        messagebox.showinfo("Success", "Video Downloaded")
 
 
 root = tk.Tk()
-pic = tk.PhotoImage(file=os.path.join(basedir, "icon.png"))
-root.iconphoto(False, pic)
-root.title("YouTube Video Downloader")
-root.geometry("400x400")
-root.resizable(width=True, height=True)
-
-cv = tk.Canvas(root, height=400, width=400, bg="#263d42")
-cv.pack()
-
-bold_font_1 = tkfont.Font(family="Helvetica", size=12, weight="bold")
-label_1 = tk.Label(root, text="Enter the URL", width=12, bg="#263d42")
-label_1.config(font=bold_font_1)
-cv.create_window(200, 100, window=label_1)
-url_entry = tk.Entry(root)
-cv.create_window(200, 140, window=url_entry)
-
-bold_font_2 = tkfont.Font(family="Helvetica", size=10, weight="bold")
-label_2 = tk.Label(root, text="Video Downloaded", width=20, bg="#263d42")
-label_2.config(font=bold_font_2)
-cv.create_window(200, 300, window=label_2)
-
-download = tk.Button(text="Download", padx=5, pady=5,
-                     fg="white", bg="DeepSkyBlue",
-                     command=get_video_url)
-cv.create_window(200, 200, window=download)
-
-
+gui = YtGui(root)
 root.mainloop()
